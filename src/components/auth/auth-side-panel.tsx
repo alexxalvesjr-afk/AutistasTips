@@ -1,7 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { TrendingUp, Target, LineChart, ShieldCheck } from "lucide-react";
+import { Target, LineChart, ShieldCheck } from "lucide-react";
+import { LogoMark } from "@/components/brand/logo";
 
 const highlights = [
   {
@@ -40,10 +41,10 @@ export function AuthSidePanel() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <div className="flex items-center gap-2 text-primary">
-            <TrendingUp className="h-6 w-6" />
+          <div className="flex items-center gap-2.5">
+            <LogoMark className="h-8 w-8" animated />
             <span className="text-lg font-semibold tracking-tight text-foreground">
-              BetManager
+              Autistas<span className="text-primary">Tips</span>
             </span>
           </div>
           <h2 className="mt-6 max-w-md text-3xl font-semibold leading-tight tracking-tight">

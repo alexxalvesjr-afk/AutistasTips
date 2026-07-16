@@ -31,9 +31,9 @@ export async function sendPasswordResetEmail(
   await transporter.sendMail({
     from: env.SMTP_FROM,
     to,
-    subject: "Redefinição de senha — BetManager",
+    subject: "Redefinição de senha — AutistasTips",
     text: [
-      "Você solicitou a redefinição da sua senha no BetManager.",
+      "Você solicitou a redefinição da sua senha no AutistasTips.",
       "",
       `Acesse o link abaixo (válido por 30 minutos):`,
       resetUrl,

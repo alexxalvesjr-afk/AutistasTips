@@ -1,4 +1,4 @@
-// BetManager — modelo de dados
+// AutistasTips — modelo de dados
 // Todas as entidades de domínio pertencem a um usuário (isolamento por userId).
 
 generator client {

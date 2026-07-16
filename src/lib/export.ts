@@ -85,7 +85,7 @@ export async function exportPdf(
 
   const doc = new jsPDF({ orientation: "landscape" });
   doc.setFontSize(14);
-  doc.text("BetManager — Relatório de apostas", 14, 16);
+  doc.text("AutistasTips — Relatório de apostas", 14, 16);
   doc.setFontSize(9);
   doc.text(`Gerado em ${new Date().toLocaleString("pt-BR")}`, 14, 22);
 

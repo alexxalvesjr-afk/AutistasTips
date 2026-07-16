@@ -15,7 +15,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     navItems.find(
       (item) =>
         pathname === item.href || pathname.startsWith(`${item.href}/`),
-    )?.label ?? "BetManager";
+    )?.label ?? "AutistasTips";
 
   return (
     <div className="flex min-h-svh">

@@ -1,4 +1,4 @@
-# Relatório de Auditoria de Segurança — BetManager
+# Relatório de Auditoria de Segurança — AutistasTips
 
 Auditoria realizada durante o desenvolvimento, com correções aplicadas e
 validadas por smoke tests automatizados contra o build de produção.

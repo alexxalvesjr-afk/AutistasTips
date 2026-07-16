@@ -1,4 +1,4 @@
-# BetManager 🎯
+# AutistasTips 🎯
 
 SaaS de gerenciamento profissional de apostas esportivas — uma planilha
 inteligente, totalmente online, com dashboard premium em dark mode.

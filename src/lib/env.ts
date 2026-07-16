@@ -22,7 +22,7 @@ const envSchema = z.object({
   SMTP_PORT: z.coerce.number().int().optional(),
   SMTP_USER: z.string().optional(),
   SMTP_PASS: z.string().optional(),
-  SMTP_FROM: z.string().default("BetManager <no-reply@localhost>"),
+  SMTP_FROM: z.string().default("AutistasTips <no-reply@localhost>"),
 });
 
 const parsed = envSchema.safeParse(process.env);

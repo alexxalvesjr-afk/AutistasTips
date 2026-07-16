@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Logo } from "@/components/brand/logo";
 import { navItems } from "@/components/layout/nav-items";
 import { useMe } from "@/hooks/use-me";
 
@@ -22,9 +22,10 @@ export function Sidebar({ onNavigate }: SidebarProps) {
 
   return (
     <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
-      <div className="flex h-14 items-center gap-2 border-b border-sidebar-border px-5">
-        <TrendingUp className="h-5 w-5 text-primary" />
-        <span className="font-semibold tracking-tight">BetManager</span>
+      <div className="flex h-14 items-center border-b border-sidebar-border px-4">
+        <Link href="/dashboard" onClick={onNavigate} aria-label="AutistasTips">
+          <Logo markClassName="h-7 w-7" wordmarkClassName="text-base" />
+        </Link>
       </div>
 
       <nav className="flex-1 space-y-0.5 overflow-y-auto p-3 scrollbar-thin">

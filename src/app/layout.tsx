@@ -17,12 +17,20 @@ const mono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "BetManager — Gestão profissional de apostas",
-    template: "%s · BetManager",
+    default: "AutistasTips — Gestão profissional de apostas",
+    template: "%s · AutistasTips",
   },
   description:
     "Planilha inteligente para gerenciamento profissional de apostas esportivas.",
+  applicationName: "AutistasTips",
   robots: { index: false },
+  openGraph: {
+    title: "AutistasTips — Gestão profissional de apostas",
+    description:
+      "Planilha inteligente para gerenciamento profissional de apostas esportivas.",
+    siteName: "AutistasTips",
+    type: "website",
+  },
 };
 
 export const viewport: Viewport = {

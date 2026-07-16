@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { TrendingUp } from "lucide-react";
+import { Logo } from "@/components/brand/logo";
 
 type AuthCardProps = {
   title: string;
@@ -16,12 +16,8 @@ export function AuthCard({ title, description, children }: AuthCardProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35 }}
     >
-      <div className="mb-8 flex items-center gap-2 text-primary lg:hidden">
-        <TrendingUp className="h-6 w-6" />
-        <span className="text-lg font-semibold tracking-tight text-foreground">
-          BetManager
-        </span>
-      </div>
+      <Logo className="mb-8 lg:hidden" />
+
       <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
       <p className="mt-1.5 text-sm text-muted-foreground">{description}</p>
       <div className="mt-8">{children}</div>

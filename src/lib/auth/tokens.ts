@@ -17,8 +17,8 @@ export async function signAccessToken(
     .setProtectedHeader({ alg: "HS256" })
     .setSubject(payload.sub)
     .setIssuedAt()
-    .setIssuer("betmanager")
-    .setAudience("betmanager")
+    .setIssuer("autistastips")
+    .setAudience("autistastips")
     .setExpirationTime(env.JWT_ACCESS_TTL)
     .sign(accessSecret);
 }
@@ -28,8 +28,8 @@ export async function verifyAccessToken(
 ): Promise<AccessTokenPayload | null> {
   try {
     const { payload } = await jwtVerify(token, accessSecret, {
-      issuer: "betmanager",
-      audience: "betmanager",
+      issuer: "autistastips",
+      audience: "autistastips",
     });
     if (
       typeof payload.sub !== "string" ||

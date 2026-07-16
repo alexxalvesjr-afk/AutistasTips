@@ -1,8 +1,8 @@
 {
-  "name": "betmanager",
+  "name": "autistastips",
   "version": "1.0.0",
   "private": true,
-  "description": "SaaS profissional para gerenciamento de apostas esportivas",
+  "description": "AutistasTips — SaaS profissional para gerenciamento de apostas esportivas",
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",
