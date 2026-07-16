@@ -1,0 +1,266 @@
+// BetManager — modelo de dados
+// Todas as entidades de domínio pertencem a um usuário (isolamento por userId).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Usuários e autenticação ────────────────────────────────────
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  BLOCKED
+}
+
+model User {
+  id              String     @id @default(cuid())
+  name            String     @db.VarChar(120)
+  email           String     @unique @db.VarChar(254)
+  passwordHash    String
+  role            Role       @default(USER)
+  status          UserStatus @default(ACTIVE)
+  emailVerifiedAt DateTime?
+
+  // Preferências
+  currency      String @default("BRL") @db.VarChar(3)
+  locale        String @default("pt-BR") @db.VarChar(10)
+  decimalFormat String @default("comma") @db.VarChar(10)
+  theme         String @default("dark") @db.VarChar(10)
+
+  // Bankroll inicial usado no cálculo de saldo total
+  initialBankroll Decimal @default(0) @db.Decimal(14, 2)
+
+  // Proteção contra força bruta
+  failedLoginAttempts Int       @default(0)
+  lockedUntil         DateTime?
+  lastLoginAt         DateTime?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  entries             Entry[]
+  sessions            Session[]
+  tags                Tag[]
+  sports              Sport[]
+  bookmakers          Bookmaker[]
+  subscription        Subscription?
+  notifications       Notification[]
+  auditLogs           AuditLog[]
+  passwordResetTokens PasswordResetToken[]
+
+  @@index([status])
+  @@map("users")
+}
+
+// Sessões independentes por dispositivo, com refresh token rotativo.
+// Apenas o hash SHA-256 do token é persistido.
+model Session {
+  id               String    @id @default(cuid())
+  userId           String
+  refreshTokenHash String    @unique
+  userAgent        String?   @db.VarChar(300)
+  ip               String?   @db.VarChar(45)
+  expiresAt        DateTime
+  lastUsedAt       DateTime  @default(now())
+  revokedAt        DateTime?
+  createdAt        DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+  @@map("sessions")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("password_reset_tokens")
+}
+
+// ─── Domínio de apostas ─────────────────────────────────────────
+
+enum EntryResult {
+  PENDING
+  WIN
+  LOSS
+  VOID
+  HALF_WIN
+  HALF_LOSS
+}
+
+enum EntryStatus {
+  OPEN
+  SETTLED
+}
+
+model Sport {
+  id     String  @id @default(cuid())
+  name   String  @db.VarChar(60)
+  icon   String? @db.VarChar(40)
+  userId String? // null = esporte global (seed)
+
+  user    User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entries Entry[]
+
+  @@unique([userId, name])
+  @@map("sports")
+}
+
+model Bookmaker {
+  id     String  @id @default(cuid())
+  name   String  @db.VarChar(80)
+  userId String? // null = casa global (seed)
+
+  user    User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entries Entry[]
+
+  @@unique([userId, name])
+  @@map("bookmakers")
+}
+
+model Tag {
+  id     String @id @default(cuid())
+  name   String @db.VarChar(40)
+  color  String @default("#e11d48") @db.VarChar(9)
+  userId String
+
+  user    User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entries EntryTag[]
+
+  @@unique([userId, name])
+  @@map("tags")
+}
+
+model Entry {
+  id          String      @id @default(cuid())
+  userId      String
+  date        DateTime
+  bookmakerId String?
+  sportId     String?
+  competition String?     @db.VarChar(120)
+  game        String      @db.VarChar(160)
+  market      String?     @db.VarChar(120)
+  selection   String?     @db.VarChar(160)
+  odd         Decimal     @db.Decimal(9, 3)
+  stake       Decimal     @db.Decimal(14, 2)
+  result      EntryResult @default(PENDING)
+  status      EntryStatus @default(OPEN)
+  profit      Decimal     @default(0) @db.Decimal(14, 2)
+  notes       String?     @db.VarChar(1000)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookmaker Bookmaker? @relation(fields: [bookmakerId], references: [id], onDelete: SetNull)
+  sport     Sport?     @relation(fields: [sportId], references: [id], onDelete: SetNull)
+  tags      EntryTag[]
+
+  @@index([userId, date])
+  @@index([userId, result])
+  @@index([userId, sportId])
+  @@index([userId, bookmakerId])
+  @@index([userId, createdAt])
+  @@map("entries")
+}
+
+model EntryTag {
+  entryId String
+  tagId   String
+
+  entry Entry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  tag   Tag   @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([entryId, tagId])
+  @@map("entry_tags")
+}
+
+// ─── Planos e assinaturas ───────────────────────────────────────
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  EXPIRED
+  TRIAL
+}
+
+model Plan {
+  id         String  @id @default(cuid())
+  slug       String  @unique @db.VarChar(40)
+  name       String  @db.VarChar(60)
+  price      Decimal @default(0) @db.Decimal(10, 2)
+  maxEntries Int? // null = ilimitado
+  features   Json    @default("[]")
+
+  subscriptions Subscription[]
+
+  @@map("plans")
+}
+
+model Subscription {
+  id         String             @id @default(cuid())
+  userId     String             @unique
+  planId     String
+  status     SubscriptionStatus @default(TRIAL)
+  startedAt  DateTime           @default(now())
+  expiresAt  DateTime?
+  canceledAt DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan Plan @relation(fields: [planId], references: [id])
+
+  @@index([planId])
+  @@map("subscriptions")
+}
+
+// ─── Observabilidade ────────────────────────────────────────────
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String   @db.VarChar(60)
+  ip        String?  @db.VarChar(45)
+  userAgent String?  @db.VarChar(300)
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([action, createdAt])
+  @@map("audit_logs")
+}
+
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  type      String    @default("info") @db.VarChar(20)
+  title     String    @db.VarChar(120)
+  body      String?   @db.VarChar(500)
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt])
+  @@map("notifications")
+}
