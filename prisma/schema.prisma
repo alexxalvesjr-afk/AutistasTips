@@ -69,6 +69,10 @@ model Session {
   id               String    @id @default(cuid())
   userId           String
   refreshTokenHash String    @unique
+  // Hash anterior à última rotação — permite detectar reuso de token
+  // já rotacionado (possível roubo) e revogar todas as sessões.
+  previousTokenHash String?  @unique
+  rotatedAt         DateTime?
   userAgent        String?   @db.VarChar(300)
   ip               String?   @db.VarChar(45)
   expiresAt        DateTime

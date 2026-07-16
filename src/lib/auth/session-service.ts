@@ -48,10 +48,14 @@ export type RotationResult =
   | { ok: true; tokens: IssuedTokens }
   | { ok: false; reason: "invalid" | "expired" | "reuse_detected" | "blocked" };
 
+// Janela em que o reuso do token anterior é tratado como corrida benigna
+// (ex.: duas abas renovando ao mesmo tempo) e não como roubo.
+const ROTATION_GRACE_MS = 10_000;
+
 /**
- * Rotaciona o refresh token. Detecção de reuso: se um token já revogado
- * for apresentado, todas as sessões do usuário são revogadas
- * (possível roubo de token — OWASP session hijacking).
+ * Rotaciona o refresh token. Detecção de reuso (OWASP session hijacking):
+ * se um token já rotacionado/revogado for apresentado fora da janela de
+ * graça, todas as sessões do usuário são revogadas.
  */
 export async function rotateSession(
   refreshToken: string,
@@ -64,7 +68,28 @@ export async function rotateSession(
     include: { user: { select: { id: true, role: true, status: true } } },
   });
 
-  if (!session) return { ok: false, reason: "invalid" };
+  if (!session) {
+    // Token não é o atual — verifica se é um token já rotacionado.
+    const rotated = await prisma.session.findUnique({
+      where: { previousTokenHash: tokenHash },
+      select: { id: true, userId: true, rotatedAt: true },
+    });
+    if (!rotated) return { ok: false, reason: "invalid" };
+
+    const withinGrace =
+      rotated.rotatedAt !== null &&
+      Date.now() - rotated.rotatedAt.getTime() < ROTATION_GRACE_MS;
+    if (withinGrace) return { ok: false, reason: "invalid" };
+
+    await revokeAllSessions(rotated.userId);
+    await audit("auth.refresh_reuse_detected", {
+      userId: rotated.userId,
+      ip: context.ip,
+      userAgent: context.userAgent,
+      metadata: { sessionId: rotated.id },
+    });
+    return { ok: false, reason: "reuse_detected" };
+  }
 
   if (session.revokedAt) {
     await revokeAllSessions(session.userId);
@@ -85,6 +110,8 @@ export async function rotateSession(
     where: { id: session.id },
     data: {
       refreshTokenHash: hashToken(newRefreshToken),
+      previousTokenHash: tokenHash,
+      rotatedAt: new Date(),
       lastUsedAt: new Date(),
       expiresAt: refreshExpiry(),
       ip: context.ip?.slice(0, 45),

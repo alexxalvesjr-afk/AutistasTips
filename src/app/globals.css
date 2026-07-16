@@ -1,0 +1,92 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 98%;
+    --foreground: 240 10% 8%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 8%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 8%;
+    --primary: 347 77% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 5% 94%;
+    --secondary-foreground: 240 6% 12%;
+    --muted: 240 5% 94%;
+    --muted-foreground: 240 4% 42%;
+    --accent: 240 5% 92%;
+    --accent-foreground: 240 6% 12%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 152 60% 38%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 240 10% 8%;
+    --border: 240 6% 88%;
+    --input: 240 6% 84%;
+    --ring: 347 77% 50%;
+    --sidebar: 0 0% 100%;
+    --sidebar-foreground: 240 10% 8%;
+    --sidebar-border: 240 6% 90%;
+    --radius: 0.625rem;
+  }
+
+  .dark {
+    --background: 240 6% 5%;
+    --foreground: 220 9% 94%;
+    --card: 240 5% 7%;
+    --card-foreground: 220 9% 94%;
+    --popover: 240 5% 8%;
+    --popover-foreground: 220 9% 94%;
+    --primary: 347 77% 55%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 4% 12%;
+    --secondary-foreground: 220 9% 88%;
+    --muted: 240 4% 12%;
+    --muted-foreground: 240 4% 58%;
+    --accent: 240 4% 14%;
+    --accent-foreground: 220 9% 94%;
+    --destructive: 0 68% 52%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 152 55% 45%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 55%;
+    --warning-foreground: 240 10% 8%;
+    --border: 240 4% 14%;
+    --input: 240 4% 18%;
+    --ring: 347 77% 55%;
+    --sidebar: 240 5% 6%;
+    --sidebar-foreground: 220 9% 94%;
+    --sidebar-border: 240 4% 12%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+  ::selection {
+    @apply bg-primary/25;
+  }
+}
+
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted)) transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted));
+    border-radius: 9999px;
+  }
+}
