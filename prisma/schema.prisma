@@ -3,6 +3,9 @@
 
 generator client {
   provider = "prisma-client-js"
+  // `native` para dev/Docker; `rhel-openssl-3.0.x` para o runtime serverless
+  // da Netlify (AWS Lambda / Amazon Linux), evitando erro de engine ausente.
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
 datasource db {

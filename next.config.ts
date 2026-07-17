@@ -39,7 +39,10 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-  output: "standalone",
+  // `standalone` é usado apenas no build do Docker. Na Netlify (que possui
+  // seu próprio runtime de Next.js), o modo standalone quebra o deploy —
+  // por isso é desativado quando a variável NETLIFY está presente.
+  output: process.env.NETLIFY ? undefined : "standalone",
   poweredByHeader: false,
   productionBrowserSourceMaps: false,
   reactStrictMode: true,

@@ -61,6 +61,28 @@ npm run dev
 SEED_ADMIN_EMAIL=admin@seudominio.com SEED_ADMIN_PASSWORD='SenhaForte#123' npm run db:seed
 ```
 
+## Deploy na Netlify
+
+O projeto já vem preparado para a Netlify (`netlify.toml` + runtime oficial
+de Next.js, detectado automaticamente). O `output: standalone` do Docker é
+desativado automaticamente no ambiente da Netlify.
+
+1. Provisione um **PostgreSQL gerenciado** acessível pela internet
+   (Neon, Supabase, Railway…) — a Netlify é serverless e não hospeda banco.
+2. Em **Site settings → Environment variables**, defina:
+   - `DATABASE_URL` — string de conexão do Postgres (com `?sslmode=require`)
+   - `JWT_ACCESS_SECRET` e `JWT_REFRESH_SECRET` — `openssl rand -base64 48`
+   - `APP_URL` — a URL pública do site na Netlify
+   - `NODE_ENV=production`
+   - *(opcional)* variáveis `SMTP_*` para envio de e-mail
+3. Aplique as migrações no banco **uma vez** a partir da sua máquina
+   (com a `DATABASE_URL` de produção): `npm run db:migrate && npm run db:seed`.
+4. Faça o deploy (build command: `npm run build`).
+
+> Observação: o rate limiter é em memória e, em ambiente serverless (funções
+> isoladas), tem eficácia reduzida — para produção séria na Netlify,
+> considere um rate limit com Redis/Upstash. Ver [SECURITY.md](./SECURITY.md).
+
 ## Scripts
 
 | Comando | Descrição |

@@ -1,0 +1,13 @@
+# Configuração de deploy na Netlify.
+# O runtime oficial de Next.js (@netlify/plugin-nextjs, v5) é detectado
+# automaticamente e converte as rotas em Netlify Functions/Edge Functions.
+# Não usar `output: standalone` (incompatível) — ver next.config.ts.
+
+[build]
+  command = "npm run build"
+
+[build.environment]
+  NODE_VERSION = "20"
+  # Evita que a validação de env derrube o build quando os segredos ainda
+  # não estão configurados; a validação real ocorre em runtime.
+  SKIP_ENV_VALIDATION = "true"

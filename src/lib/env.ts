@@ -25,15 +25,43 @@ const envSchema = z.object({
   SMTP_FROM: z.string().default("AutistasTips <no-reply@localhost>"),
 });
 
-const parsed = envSchema.safeParse(process.env);
+/**
+ * Durante o build (Next.js define NEXT_PHASE) ou quando SKIP_ENV_VALIDATION
+ * está ativo, a validação não derruba o processo — os segredos podem ainda
+ * não estar disponíveis no ambiente de build de plataformas como a Netlify.
+ * A validação estrita continua valendo em runtime (primeira requisição).
+ */
+const skipValidation =
+  process.env.SKIP_ENV_VALIDATION === "true" ||
+  process.env.NEXT_PHASE === "phase-production-build";
 
-if (!parsed.success) {
+function loadEnv() {
+  const parsed = envSchema.safeParse(process.env);
+  if (parsed.success) return parsed.data;
+
+  if (skipValidation) {
+    // Placeholders válidos apenas para o build passar; nunca usados em runtime
+    // real, pois lá as variáveis verdadeiras estão presentes.
+    return envSchema.parse({
+      ...process.env,
+      DATABASE_URL:
+        process.env.DATABASE_URL ||
+        "postgresql://user:password@localhost:5432/placeholder",
+      JWT_ACCESS_SECRET:
+        process.env.JWT_ACCESS_SECRET ||
+        "build-time-placeholder-secret-value-000",
+      JWT_REFRESH_SECRET:
+        process.env.JWT_REFRESH_SECRET ||
+        "build-time-placeholder-secret-value-111",
+    });
+  }
+
   const issues = parsed.error.issues
     .map((i) => `  - ${i.path.join(".")}: ${i.message}`)
     .join("\n");
   throw new Error(`Variáveis de ambiente inválidas:\n${issues}`);
 }
 
-export const env = parsed.data;
+export const env = loadEnv();
 
 export const isProduction = env.NODE_ENV === "production";
