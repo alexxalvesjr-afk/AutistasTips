@@ -1,10 +1,15 @@
 # Configuração de deploy na Netlify.
-# O runtime oficial de Next.js (@netlify/plugin-nextjs, v5) é detectado
+#
+# O runtime oficial de Next.js (@netlify/plugin-nextjs v5) é detectado
 # automaticamente e converte as rotas em Netlify Functions/Edge Functions.
-# Não usar `output: standalone` (incompatível) — ver next.config.ts.
+# NÃO declare o plugin aqui e NÃO o instale pela UI — o v5 é embutido.
+# (Se houver um plugin @netlify/plugin-nextjs instalado pela UI, remova-o:
+#  ele prende o site na versão v4, incompatível com Next.js 15.)
 
 [build]
   command = "npm run build"
+  # Diretório de saída do Next.js (exigido pelo runtime).
+  publish = ".next"
 
 [build.environment]
   NODE_VERSION = "20"
